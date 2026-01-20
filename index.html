@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Multimodal → Text Output (Image→Text Transformer, Export TXT/PDF/DOCX)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <header class="container">
+    <h1>Multimodal Input → Text Output</h1>
+    <p class="muted">
+      รับ: ข้อความ • เสียง (อัด/อัปโหลด) • รูปภาพ (อัปโหลด + Image→Text ด้วย Transformer) → Output เป็น “ข้อความ”
+    </p>
+    <div id="envNotice" class="notice" role="status" aria-live="polite"></div>
+  </header>
+
+  <main class="container grid">
+    <!-- TEXT -->
+    <section class="card">
+      <h2>1) ข้อความ</h2>
+      <label class="label" for="textInput">พิมพ์ข้อความ</label>
+      <textarea id="textInput" rows="7" placeholder="กรอกข้อความที่ต้องการ..."></textarea>
+      <div class="row">
+        <button id="btnClearText" class="btn secondary" type="button">ล้างข้อความ</button>
+      </div>
+    </section>
+
+    <!-- AUDIO -->
+    <section class="card">
+      <h2>2) เสียง</h2>
+
+      <div class="subcard">
+        <h3>อัดเสียงจากไมโครโฟน</h3>
+        <p class="muted small">บันทึกเสียงด้วย MediaRecorder</p>
+
+        <div class="row">
+          <button id="btnStartRec" class="btn" type="button">เริ่มอัด</button>
+          <button id="btnStopRec" class="btn danger" type="button" disabled>หยุด</button>
+          <span id="recStatus" class="pill" aria-live="polite">พร้อม</span>
+        </div>
+
+        <audio id="audioPreviewRec" controls class="media" hidden></audio>
+
+        <div class="row">
+          <button id="btnClearRec" class="btn secondary" type="button" disabled>ล้างเสียงที่อัด</button>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <h3>อัปโหลดไฟล์เสียง</h3>
+        <input id="audioFile" type="file" accept="audio/*" />
+        <audio id="audioPreviewUp" controls class="media" hidden></audio>
+        <div class="row">
+          <button id="btnClearAudioUp" class="btn secondary" type="button" disabled>ล้างไฟล์เสียง</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- IMAGE -->
+    <section class="card">
+      <h2>3) รูปภาพ</h2>
+      <input id="imageFile" type="file" accept="image/*" />
+
+      <div class="imageWrap" id="imageWrap" hidden>
+        <img id="imagePreview" alt="Image preview" />
+      </div>
+
+      <div class="row">
+        <button id="btnClearImage" class="btn secondary" type="button" disabled>ล้างรูปภาพ</button>
+        <button id="btnImageToText" class="btn" type="button" disabled>Image → Text (Transformer)</button>
+        <span id="visionStatus" class="pill" aria-live="polite">ยังไม่รัน</span>
+      </div>
+
+      <label class="label" for="imageText">ข้อความจากรูป (Image→Text)</label>
+      <textarea id="imageText" rows="4" readonly placeholder="กดปุ่ม Image → Text เพื่อสร้างข้อความจากรูป..."></textarea>
+      <div class="row">
+        <button id="btnClearImageText" class="btn secondary" type="button" disabled>ล้างข้อความจากรูป</button>
+      </div>
+    </section>
+
+    <!-- OUTPUT + EXPORT -->
+    <section class="card">
+      <h2>4) Output (ข้อความ) และส่งออกไฟล์</h2>
+      <p class="muted small">
+        ทำงาน client-side ทั้งหมด เหมาะกับ GitHub Pages (static hosting)
+      </p>
+
+      <div class="row">
+        <button id="btnBuildText" class="btn" type="button">สร้างรายงานข้อความ</button>
+        <button id="btnResetAll" class="btn secondary" type="button">รีเซ็ตทั้งหมด</button>
+      </div>
+
+      <label class="label" for="outputText">รายงาน (Text)</label>
+      <textarea id="outputText" rows="12" readonly placeholder="กด 'สร้างรายงานข้อความ'..."></textarea>
+
+      <div class="row exportRow">
+        <label class="label" for="exportFormat" style="margin:0;">ส่งออกเป็น</label>
+        <select id="exportFormat" class="select">
+          <option value="txt">TXT (.txt)</option>
+          <option value="pdf">PDF (.pdf)</option>
+          <option value="docx">DOCX (.docx)</option>
+        </select>
+
+        <button id="btnExport" class="btn" type="button" disabled>ส่งออกไฟล์</button>
+      </div>
+
+      <!-- พื้นที่สำหรับเรนเดอร์ PDF (ซ่อนไว้) -->
+      <div id="printArea" class="printArea" hidden>
+        <div class="printHeader">
+          <div class="printTitle">Multimodal → Text Report</div>
+          <div class="printMeta" id="printMeta"></div>
+        </div>
+        <hr class="printHr" />
+        <pre id="printPre" class="printPre"></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <span class="muted small">Client-side only • Image→Text via Transformer • Export TXT/PDF/DOCX</span>
+  </footer>
+
+  <!-- PDF: html2pdf.js (client-side HTML → PDF) -->
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.3/dist/html2pdf.bundle.min.js"></script>
+
+  <!-- DOCX: docx (browser) -->
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+
+  <!-- App (ES module) -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
